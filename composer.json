@@ -1,0 +1,17 @@
+{
+    "name": "abdur/article_website",
+    "autoload": {
+        "psr-4": {
+            "Abdur\\ArticleWebsite\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Abdurr",
+            "email": "94680006+Lastdough@users.noreply.github.com"
+        }
+    ],
+    "require": {
+        "vlucas/phpdotenv": "^5.6"
+    }
+}
