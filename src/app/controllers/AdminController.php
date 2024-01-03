@@ -16,11 +16,12 @@ class AdminController
         header('Location: /LSPWebsite/admin/dashboard');
     }
 
-    public function login($username, $password)
+    public function login()
     {
-        // $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-        $result = $this->adminModel->authenticate($username, $password);
+        $username = $_POST['username'];
+        $password = $_POST['password'];
 
+        $result = $this->adminModel->authenticate($username, $password);
         if (is_array($result) && $result['success']) {
             // Set session variables and proceed with login
             $_SESSION['admin_logged_in'] = true;

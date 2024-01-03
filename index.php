@@ -121,7 +121,7 @@ switch ($uri) {
             $adminController->loginView();
         } else if ($method == 'POST') {
             $adminController = new AdminController();
-            $adminController->login($_POST['username'], $_POST['password']);
+            $adminController->login();
         } else {
             $articleController = new ArticleController();
             $articleController->not_found_404();
