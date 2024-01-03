@@ -44,10 +44,56 @@ switch ($uri) {
         $articleController = new ArticleController();
         $articleController->index();
         break;
-    case '/article':
+    case '/article/view':
         if (isset($_GET['id'])) {
             $articleController = new ArticleController();
             $articleController->view($_GET['id']);
+        } else {
+            $articleController = new ArticleController();
+            $articleController->not_found_404();
+        }
+        break;
+    case '/article/create':
+        if ($method == 'GET') {
+            $articleController = new ArticleController();
+            $articleController->createArticleView();
+        } else if ($method == 'POST') {
+            $articleController = new ArticleController();
+            $articleController->createArticle();
+        } else {
+            $articleController = new ArticleController();
+            $articleController->not_found_404();
+        }
+        break;
+    case '/article/edit':
+        if (isset($_GET['id'])) {
+            if ($method == 'GET') {
+                $articleController = new ArticleController();
+                $articleController->editArticleView($_GET['id']);
+            } else if ($method == 'PUT') {
+                $articleController = new ArticleController();
+                $articleController->editArticle($_GET['id']);
+            } else {
+                $articleController = new ArticleController();
+                $articleController->not_found_404();
+            }
+        } else {
+            $articleController = new ArticleController();
+            $articleController->not_found_404();
+        }
+        break;
+    case '/article/delete':
+        if (isset($_GET['id'])) {
+            if ($method == 'GET') {
+                $articleController = new ArticleController();
+                $articleController->editArticleView($_GET['id']);
+            } else if ($method == 'DELETE') {
+                $articleController = new ArticleController();
+                $articleController->editArticle($_GET['id']);
+            } else {
+                $articleController = new ArticleController();
+                $articleController->not_found_404();
+            }
         } else {
             $articleController = new ArticleController();
             $articleController->not_found_404();
@@ -88,27 +134,6 @@ switch ($uri) {
     case '/admin/dashboard':
         $adminController = new AdminController();
         $adminController->dashboard();
-        break;
-    case '/admin/create':
-        if ($method == 'GET') {
-            $articleController = new ArticleController();
-            $articleController->createArticleView();
-        } else if ($method == 'POST') {
-            $articleController = new ArticleController();
-            $articleController->createArticle();
-        } else {
-            $articleController = new ArticleController();
-            $articleController->not_found_404();
-        }
-        break;
-    case '/admin/edit':
-        if (isset($_GET['id'])) {
-            $articleController = new ArticleController();
-            $articleController->view($_GET['id']);
-        } else {
-            $articleController = new ArticleController();
-            $articleController->not_found_404();
-        }
         break;
     default:
         $articleController = new ArticleController();
