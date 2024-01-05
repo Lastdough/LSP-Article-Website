@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Article</title>
+    <title>Create Article</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
     <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/uylud4u1jsb5qj6yu5s2w33twij11lpjevd75rdgj4nv2x6i/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
@@ -34,31 +34,41 @@
 
     <div class="container mx-auto mt-8">
         <div class="bg-white p-6 rounded shadow-md">
-            <h2 class="text-2xl font-bold mb-6">Edit Article</h2>
+            <h2 class="text-2xl font-bold mb-6">Create New Article</h2>
+            <?php if (isset($_SESSION['error'])) : ?>
+                <div id="errorPopup" class="fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
+                    <?= htmlspecialchars($_SESSION['error']); ?>
+                </div>
+                <?php unset($_SESSION['error']); // Clear the error message 
+                ?>
+            <?php endif; ?>
 
-            <form id="articleForm" method="POST" action="/LSPWebsite/admin/article-edit?id=<?= $article['article_id'] ?>" enctype="multipart/form-data">
+            <form id="articleForm" method="POST" action="/LSPWebsite/admin/article-create" enctype="multipart/form-data">
                 <div class="mb-4">
                     <label for="title" class="block text-gray-700 text-sm font-bold mb-2">Title:</label>
-                    <input type="text" id="title" name="title" value="<?= htmlspecialchars($article['title']) ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <input type="text" id="title" name="title" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
 
                 <div class="mb-4">
                     <label for="header" class="block text-gray-700 text-sm font-bold mb-2">Header:</label>
-                    <input type="text" id="header" name="header" value="<?= htmlspecialchars($article['header']) ?>" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
+                    <input type="text" id="header" name="header" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" required>
                 </div>
 
+                <!-- Picture Input -->
                 <div class="mb-4">
                     <label for="picture" class="block text-gray-700 text-sm font-bold mb-2">Picture:</label>
-                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <!-- Optionally show existing picture -->
-                    <?php if (isset($article['picture'])) : ?>
-                        <img src="<?= $article['picture']?>" alt="Current Picture" class="max-w-xs mt-2">
-                    <?php endif; ?>
+                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();">
+                    <!-- Image Preview Container -->
+                    <div id="imagePreviewContainer" class="mt-2">
+                        <!-- style="max-width: 100%; height: auto;" -->
+                        <img id="imagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mt-2" />
+                    </div>
                 </div>
+
 
                 <div class="mb-4">
                     <label for="content" class="block text-gray-700 text-sm font-bold mb-2">Content:</label>
-                    <textarea id="content" col="5" name="content"><?= htmlspecialchars($article['content']) ?></textarea>
+                    <textarea id="content" col="5" name="content"></textarea>
                 </div>
 
                 <!-- Buttons for Draft and Publish -->
@@ -72,11 +82,38 @@
 
     <!-- Initialize TinyMCE -->
     <script>
+        window.onload = function() {
+            var errorPopup = document.getElementById('errorPopup');
+            if (errorPopup) {
+                setTimeout(function() {
+                    errorPopup.style.display = 'none';
+                }, 3000);
+            }
+        };
+
         tinymce.init({
             selector: '#content',
             plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
             toolbar_mode: 'floating',
         });
+
+        function previewImage() {
+            var preview = document.getElementById('imagePreview');
+            var file = document.getElementById('picture').files[0];
+            var reader = new FileReader();
+
+            reader.onloadend = function() {
+                preview.src = reader.result;
+                preview.classList.remove('hidden');
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            } else {
+                preview.src = "";
+                preview.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 
