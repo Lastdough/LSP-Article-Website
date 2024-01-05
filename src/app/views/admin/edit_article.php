@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Edit Article</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        <?php include "src\public\css\output.css" ?>
+    </style>
     <!-- TinyMCE -->
     <script src="https://cdn.tiny.cloud/1/uylud4u1jsb5qj6yu5s2w33twij11lpjevd75rdgj4nv2x6i/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
     <script>
@@ -52,7 +54,7 @@
                     <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
                     <!-- Optionally show existing picture -->
                     <?php if (isset($article['picture'])) : ?>
-                        <img src="<?= $article['picture']?>" alt="Current Picture" class="max-w-xs mt-2">
+                        <img src="<?= $article['picture'] ?>" alt="Current Picture" class="max-w-xs mt-2">
                     <?php endif; ?>
                 </div>
 
