@@ -52,6 +52,7 @@
                         <div class="p-2">
                             <h4 class="text-lg font-semibold"><?= htmlspecialchars($article['title']) ?></h4>
                             <p class="text-gray-600 text-sm"><?= htmlspecialchars($article['header']) ?></p>
+                            <p class="text-gray-600 text-xs">By <?= htmlspecialchars($article['author_name']) ?></p>
                             <a href="/LSPWebsite/article/view?id=<?= htmlspecialchars($article['article_id']) ?>" class="text-blue-600 hover:underline">Read More</a>
                         </div>
                     </div>
