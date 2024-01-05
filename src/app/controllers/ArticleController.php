@@ -14,7 +14,9 @@ class ArticleController
     public function index()
     {
         // Logic to display articles to the user
-        $article = $this->articleModel->getAllArticles();
+        $articles = $this->articleModel->getAllArticles();
+        $recentArticles = $this->articleModel->getRecentArticles();
+
         include 'src\app\views\user\home_page.php';
     }
 
@@ -22,8 +24,12 @@ class ArticleController
     public function view($articleId)
     {
         $article = $this->articleModel->getArticleById($articleId);
+        $originalDate = $article['updated_at'];
+        $date = new DateTime($originalDate, new DateTimeZone('Asia/Jakarta'));
+        $formattedDate = $date->format('M j, Y, H:i T');
+
         if ($article) {
-            include 'src\app\views\user\article_detail.php';
+            include 'src\app\views\user\view_article.php';
         } else {
             $this->not_found_404();
         }
@@ -50,7 +56,8 @@ class ArticleController
             // Check for upload errors
             if ($file['error'] == UPLOAD_ERR_OK) {
                 $maxFileSize = 15 * 1024 * 1024; // 16MB in bytes
-                if ($file['size'] > $maxFileSize
+                if (
+                    $file['size'] > $maxFileSize
                 ) {
                     $result = "File is too large. Maximum size allowed is 15MB.";
                 }
@@ -144,7 +151,7 @@ class ArticleController
             header('Location: /LSPWebsite/admin/dashboard');
         } else {
             $_SESSION['error'] = $result;
-            header('Location: /LSPWebsite/admin/edit-article/' . $articleId . '?error=' . urlencode($result));
+            header('Location: /LSPWebsite/admin/dashboard');
         }
         exit;
     }
@@ -155,7 +162,7 @@ class ArticleController
             $uploadResult = $this->processUploadedFile();
             if ($uploadResult['error']) {
                 $_SESSION['error'] = $uploadResult['message'];
-                header('Location: /LSPWebsite/admin/edit-article/' . $articleId . '?error=' . urlencode($uploadResult['message']));
+                header('Location: /LSPWebsite/admin/dashboard');
                 exit;
             }
             return $uploadResult['pictureBinary'];
