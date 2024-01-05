@@ -40,9 +40,9 @@
             <?php if (isset($_SESSION['error'])) : ?>
                 <div id="errorPopup" class="fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
                     <?= htmlspecialchars($_SESSION['error']); ?>
+                    <button onclick="document.getElementById('errorPopup').style.display='none'" class="text-lg ml-2">&times;</button>
                 </div>
-                <?php unset($_SESSION['error']); // Clear the error message 
-                ?>
+                <?php unset($_SESSION['error']); ?>
             <?php endif; ?>
 
             <form id="articleForm" method="POST" action="/LSPWebsite/admin/article-create" enctype="multipart/form-data">
@@ -62,7 +62,6 @@
                     <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();">
                     <!-- Image Preview Container -->
                     <div id="imagePreviewContainer" class="mt-2">
-                        <!-- style="max-width: 100%; height: auto;" -->
                         <img id="imagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mt-2" />
                     </div>
                 </div>
@@ -84,14 +83,9 @@
 
     <!-- Initialize TinyMCE -->
     <script>
-        window.onload = function() {
-            var errorPopup = document.getElementById('errorPopup');
-            if (errorPopup) {
-                setTimeout(function() {
-                    errorPopup.style.display = 'none';
-                }, 3000);
-            }
-        };
+        setTimeout(function() {
+            document.getElementById('errorPopup').style.display = 'none';
+        }, 3000);
 
         tinymce.init({
             selector: '#content',

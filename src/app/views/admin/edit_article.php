@@ -37,6 +37,13 @@
     <div class="container mx-auto mt-8">
         <div class="bg-white p-6 rounded shadow-md">
             <h2 class="text-2xl font-bold mb-6">Edit Article</h2>
+            <?php if (isset($_SESSION['error'])) : ?>
+                <div id="errorPopup" class="fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
+                    <?= htmlspecialchars($_SESSION['error']); ?>
+                    <button onclick="document.getElementById('errorPopup').style.display='none'" class="text-lg ml-2">&times;</button>
+                </div>
+                <?php unset($_SESSION['error']); ?>
+            <?php endif; ?>
 
             <form id="articleForm" method="POST" action="/LSPWebsite/admin/article-edit?id=<?= $article['article_id'] ?>" enctype="multipart/form-data">
                 <div class="mb-4">
@@ -51,11 +58,15 @@
 
                 <div class="mb-4">
                     <label for="picture" class="block text-gray-700 text-sm font-bold mb-2">Picture:</label>
-                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
-                    <!-- Optionally show existing picture -->
-                    <?php if (isset($article['picture'])) : ?>
-                        <img src="<?= $article['picture'] ?>" alt="Current Picture" class="max-w-xs mt-2">
-                    <?php endif; ?>
+                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();">
+                    <!-- Image Preview Container -->
+                    <div id="imagePreviewContainer" class="mt-2">
+                        <?php if (isset($article['picture'])) : ?>
+                            <img id="imagePreview" src="<?= $article['picture'] ?>" alt="Current Picture" class="max-w-xs mt-2" />
+                        <?php else : ?>
+                            <img id="imagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mt-2" />
+                        <?php endif; ?>
+                    </div>
                 </div>
 
                 <div class="mb-4">
@@ -74,11 +85,33 @@
 
     <!-- Initialize TinyMCE -->
     <script>
+        setTimeout(function() {
+            document.getElementById('errorPopup').style.display = 'none';
+        }, 3000);
+        
         tinymce.init({
             selector: '#content',
             plugins: 'advlist autolink lists link image charmap print preview hr anchor pagebreak',
             toolbar_mode: 'floating',
         });
+
+        function previewImage() {
+            var preview = document.getElementById('imagePreview');
+            var file = document.getElementById('picture').files[0];
+            var reader = new FileReader();
+
+            reader.onloadend = function() {
+                preview.src = reader.result;
+                preview.classList.remove('hidden');
+            }
+
+            if (file) {
+                reader.readAsDataURL(file);
+            } else if (!<?= isset($article['picture']) ?>) {
+                preview.src = "";
+                preview.classList.add('hidden');
+            }
+        }
     </script>
 </body>
 

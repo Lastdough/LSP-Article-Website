@@ -41,7 +41,11 @@ class Article
      */
     public function getAllArticles()
     {
-        $query = "SELECT * FROM article_table";
+        $query = "SELECT article_table.*, admin_table.name AS author_name 
+              FROM article_table 
+              LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id
+              WHERE publish_state = 'publish'";
+
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -55,6 +59,40 @@ class Article
 
         return $articles;
     }
+
+    /**
+     * Retrieves the most recent articles.
+     * 
+     * @param int $limit The number of recent articles to retrieve.
+     * @return array An array of recent articles.
+     */
+    public function getRecentArticles($limit = 5)
+    {
+        // SQL query to fetch recent articles
+        $query = "SELECT article_table.*, admin_table.name AS author_name 
+              FROM article_table 
+              LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id
+              WHERE article_table.publish_state = 'publish'
+              ORDER BY article_table.updated_at DESC 
+              LIMIT :limit";
+
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+        foreach ($articles as $key => $article) {
+            if (isset($article['picture'])) {
+                $base64 = base64_encode($article['picture']);
+                $articles[$key]['picture'] = 'data:image/jpeg;base64,' . $base64;
+            }
+        }
+        return $articles;
+    }
+
     /**
      * Mengambil semua artikel yang ditulis oleh penulis dengan ID tertentu.
      * 
@@ -92,7 +130,11 @@ class Article
      */
     public function getArticleById($articleId)
     {
-        $query = "SELECT * FROM article_table WHERE article_id = :articleId";
+        $query = "SELECT article_table.*, admin_table.name AS author_name 
+              FROM article_table 
+              LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id 
+              WHERE article_table.article_id = :articleId";
+        
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':articleId', $articleId, PDO::PARAM_INT);
         $stmt->execute();
@@ -118,7 +160,9 @@ class Article
      */
     public function searchArticles($searchTerm)
     {
-        $query = "SELECT * FROM article_table WHERE title LIKE :searchTerm OR header LIKE :searchTerm";
+        $query = "SELECT * FROM article_table 
+              WHERE (title LIKE :searchTerm OR header LIKE :searchTerm)
+              AND publish_state = 'publish'"; 
         $stmt = $this->conn->prepare($query);
         $searchTerm = '%' . $searchTerm . '%';
         $stmt->bindParam(':searchTerm', $searchTerm);
