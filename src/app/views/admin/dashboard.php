@@ -5,11 +5,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        <?php include "src\public\css\output.css" ?>
+    </style>
 </head>
 
 
-//TODO : Margin Bottom
+<!-- TODO : Margin Bottom -->
 
 <body class="bg-gray-200">
 

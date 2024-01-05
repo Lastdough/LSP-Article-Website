@@ -1,0 +1,22 @@
+{
+  "name": "lsp-article-website",
+  "version": "1.0.0",
+  "description": "```bash\r /Website Name\r     /src\r         /app\r             /controllers\r             /models\r             /views\r         /config\r         /public\r             /css\r             /js\r             /images\r         /utilities\r     /vendor\r     .htaccess\r     index.php",
+  "main": "src\\public\\js\\index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Lastdough/LSP-Article-Website.git"
+  },
+  "author": "abdurr",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Lastdough/LSP-Article-Website/issues"
+  },
+  "homepage": "https://github.com/Lastdough/LSP-Article-Website#readme",
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}
