@@ -1,14 +1,17 @@
 <?php
 require_once 'src\app\models\Admin.php';
+require_once 'src\app\models\Article.php';
 require_once 'src\utilities\utils.php';
 
 class AdminController
 {
     private $adminModel;
+    private $articleModel;
 
     public function __construct()
     {
         $this->adminModel = new Admin();
+        $this->articleModel = new Article();
     }
 
     public function index()
@@ -26,13 +29,11 @@ class AdminController
             // Set session variables and proceed with login
             $_SESSION['admin_logged_in'] = true;
             $_SESSION['admin_id'] = $result['data']['admin_id'];
-            $_SESSION['admin_username'] = $result['data']['username'];
-            // ... other session settings ...
+            $_SESSION['author_name'] = $result['data']['name'];
             header('Location: /LSPWebsite/admin/dashboard');
             exit;
         } else {
-            // Handle login failure
-            // Displays the error message
+
             $_SESSION['error'] = $result;
             header('Location: /LSPWebsite/admin/login');
             exit;
@@ -57,7 +58,6 @@ class AdminController
             header('Location: /LSPWebsite/admin/register');
             exit;
         }
-
 
         // Hash the password
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
@@ -91,20 +91,25 @@ class AdminController
 
     public function dashboard()
     {
+        $searchTerm = $_GET['search'] ?? ''; // Get the search term from the query parameter
+        $currentAdminId = $_SESSION['admin_id'];
+
+        if (!empty($searchTerm)) {
+            // Search the articles based on the search term
+            // This method should be implemented in your Article model
+            $articles = $this->articleModel->searchActiveArticlesByAuthor($searchTerm, $currentAdminId);
+        } else {
+            // Get all articles if there's no search term
+            $articles = $this->articleModel->getAllArticlesByTheSameAuthor($currentAdminId);
+        }
+
         if (!isAdminLoggedIn()) {
             header('Location: /LSPWebsite/admin/login');
             exit;
         }
 
-        $adminData = null;
-        $articles = null;
+        $adminName = $_SESSION['author_name'];
 
-        $data = array(
-            'adminData' => $adminData,
-            'articles' => $articles
-        );
-
-        // Logic to check credentials against the database
         include 'src\app\views\admin\dashboard.php';
     }
 }

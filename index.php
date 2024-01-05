@@ -53,24 +53,21 @@ switch ($uri) {
             $articleController->not_found_404();
         }
         break;
-    case '/article/create':
+    case '/admin/article-create':
         if ($method == 'GET') {
             $articleController = new ArticleController();
             $articleController->createArticleView();
         } else if ($method == 'POST') {
             $articleController = new ArticleController();
             $articleController->createArticle();
-        } else {
-            $articleController = new ArticleController();
-            $articleController->not_found_404();
         }
         break;
-    case '/article/edit':
+    case '/admin/article-edit':
         if (isset($_GET['id'])) {
             if ($method == 'GET') {
                 $articleController = new ArticleController();
                 $articleController->editArticleView($_GET['id']);
-            } else if ($method == 'PUT') {
+            } else if ($method == 'POST') {
                 $articleController = new ArticleController();
                 $articleController->editArticle($_GET['id']);
             } else {
@@ -82,21 +79,19 @@ switch ($uri) {
             $articleController->not_found_404();
         }
         break;
-    case '/article/delete':
-        if (isset($_GET['id'])) {
+    case '/admin/article-delete':
+        if (isset($_GET['article_id'])) {
             if ($method == 'GET') {
                 $articleController = new ArticleController();
-                $articleController->editArticleView($_GET['id']);
-            } else if ($method == 'DELETE') {
+                $articleController->deleteArticle($_GET['article_id']);
+            } else if ($method == 'POST') {
                 $articleController = new ArticleController();
-                $articleController->editArticle($_GET['id']);
+                $articleController->deleteArticle($_GET['article_id']);
             } else {
-                $articleController = new ArticleController();
-                $articleController->not_found_404();
+           
             }
         } else {
-            $articleController = new ArticleController();
-            $articleController->not_found_404();
+            
         }
         break;
     case '/admin':
