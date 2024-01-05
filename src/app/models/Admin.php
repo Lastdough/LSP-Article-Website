@@ -1,18 +1,33 @@
 <?php
 require_once 'Database.php';
 
-
+/**
+ * Class Admin
+ * 
+ * Kelas ini bertanggung jawab untuk mengelola data dan operasi yang berkaitan dengan admin.
+ */
 class Admin
 {
-    private $conn;
+    private $conn;  // Koneksi database
 
+    /**
+     * Constructor kelas Admin.
+     * 
+     * Inisialisasi koneksi database untuk digunakan dalam operasi-operasi lainnya.
+     */
     public function __construct()
     {
         $database = new Database();
         $this->conn = $database->getConnection();
     }
 
-
+    /**
+     * Memverifikasi kredensial admin.
+     * 
+     * @param string $username Username admin.
+     * @param string $password Password admin yang telah di-hash.
+     * @return array|string Hasil verifikasi, berupa array ['success' => true, 'data' => $admin] jika berhasil, atau pesan error jika gagal.
+     */
     public function authenticate($username, $password)
     {
         $query = "SELECT * FROM admin_table WHERE username = :username";
@@ -35,6 +50,10 @@ class Admin
         }
     }
 
+
+    /**
+     * Menghapus sesi admin (logout).
+     */
     public function removeSession()
     {
         // Unset all session variables
@@ -43,6 +62,15 @@ class Admin
         session_destroy();
     }
 
+
+    /**
+     * Membuat akun admin baru.
+     * 
+     * @param string $username Username untuk akun baru.
+     * @param string $name Nama lengkap admin untuk akun baru.
+     * @param string $hashedPassword Password yang telah di-hash untuk akun baru.
+     * @return string Pesan yang mengindikasikan berhasil atau gagalnya proses pembuatan akun.
+     */
     public function createAccount($username, $name, $hashedPassword)
     {
         if ($this->isUsernameExist($username)) {
@@ -63,7 +91,12 @@ class Admin
         }
     }
 
-
+    /**
+     * Memeriksa apakah username sudah ada di database.
+     * 
+     * @param string $username Username yang ingin diperiksa.
+     * @return bool Mengembalikan true jika username sudah ada, false jika belum.
+     */
     private function isUsernameExist($username) {
         $query = "SELECT * FROM admin_table WHERE username = :username";
         $stmt = $this->conn->prepare($query);
