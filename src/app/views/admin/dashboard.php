@@ -38,6 +38,13 @@
                     <?php unset($_SESSION['message']);
                     ?>
                 <?php endif; ?>
+                <?php if (isset($_SESSION['error'])) : ?>
+                    <div id="errorPopup" class="fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
+                        <?= htmlspecialchars($_SESSION['error']); ?>
+                        <button onclick="document.getElementById('errorPopup').style.display='none'" class="text-lg ml-2">&times;</button>
+                    </div>
+                    <?php unset($_SESSION['error']); ?>
+                <?php endif; ?>
                 <div class="flex space-x-4">
                     <!-- Search Form -->
                     <form action="/LSPWebsite/admin/dashboard" method="get" class="flex items-center space-x-1">
