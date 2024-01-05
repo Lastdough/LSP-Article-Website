@@ -15,11 +15,14 @@
             /admin
                 - dashboard.php
                 - login.php
+                - register.php
                 - edit_article.php
-                - new_article.php
+                - create_article.php
             /user
-                - index.php
-                - article_detail.php
+                - home_page.php
+                - view_article.php
+            /error
+                - 404.php
     /config
         - config.php
     /public
