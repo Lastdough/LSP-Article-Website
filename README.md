@@ -1,31 +1,8 @@
 
-## GPT [Link](https://chat.openai.com/share/19f8def0-f4d8-43d4-bcb7-4c87dda68054)
+# Project Structure
 
 ```bash
-/Website Name
-    /src
-        /app
-            /controllers
-            /models
-            /views
-        /config
-        /public
-            /css
-            /js
-            /images
-        /utilities
-    /vendor
-    .htaccess
-    index.php
-
-----
-$xampp = "C:\xampp\htdocs"
-
-mklink /j $xampp . 
-
-----
-
-/YourProject
+/LSP Article Website
     /app
         /controllers
             - AdminController.php
@@ -53,5 +30,16 @@ mklink /j $xampp .
     index.php
 ```
 
+## Htdocs 
+
+```bash 
+$htdocs = "C:\xampp\htdocs\LSPWebsite"
+$current = Get-Location
+
+Write-Output $htdocs $current
+
+cmd.exe /c mklink /j $htdocs $current
+
+```
 
 
