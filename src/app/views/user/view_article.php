@@ -53,7 +53,6 @@
         </div>
         <!-- Article Content -->
         <div class="article-content max-w-none">
-            <!-- Article content goes here -->
             <?= $article['content'] ?>
         </div>
     </div>

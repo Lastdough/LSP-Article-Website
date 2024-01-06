@@ -9,10 +9,6 @@
         <?php include "src\public\css\output.css" ?>
     </style>
 </head>
-
-
-<!-- TODO : Margin Bottom -->
-
 <body class="bg-gray-200">
 
     <nav class="bg-white p-4 shadow">
