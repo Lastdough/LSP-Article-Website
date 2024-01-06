@@ -28,10 +28,10 @@ class Article
      */
     private function generateArticleId($adminId)
     {
-        $timePart = date('His'); 
-        $safeAdminId = $adminId % 100; 
+        $timePart = date('His');
+        $safeAdminId = $adminId % 100;
         $articleId = $timePart . $safeAdminId;
-        return (int)$articleId; 
+        return (int)$articleId;
     }
 
     /**
@@ -108,7 +108,7 @@ class Article
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':adminId', $adminId, PDO::PARAM_INT);
         $stmt->execute();
-        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);  
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         foreach ($articles as $key => $article) {
             if (isset($article['picture'])) {
@@ -134,7 +134,7 @@ class Article
               FROM article_table 
               LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id 
               WHERE article_table.article_id = :articleId";
-        
+
         $stmt = $this->conn->prepare($query);
         $stmt->bindParam(':articleId', $articleId, PDO::PARAM_INT);
         $stmt->execute();
@@ -160,14 +160,26 @@ class Article
      */
     public function searchArticles($searchTerm)
     {
-        $query = "SELECT * FROM article_table 
-              WHERE (title LIKE :searchTerm OR header LIKE :searchTerm)
-              AND publish_state = 'publish'"; 
+        $query = "SELECT article_table.*, admin_table.name AS author_name 
+          FROM article_table 
+          LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id
+          WHERE (title LIKE :searchTerm OR header LIKE :searchTerm)
+          AND publish_state = 'publish'";
+          
         $stmt = $this->conn->prepare($query);
         $searchTerm = '%' . $searchTerm . '%';
         $stmt->bindParam(':searchTerm', $searchTerm);
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        foreach ($articles as $key => $article) {
+            if (isset($article['picture'])) {
+                $base64 = base64_encode($article['picture']);
+                $articles[$key]['picture'] = 'data:image/jpeg;base64,' . $base64;
+            }
+        }
+        return $articles;
     }
 
     /**
