@@ -23,33 +23,36 @@
                 </svg>
                 <h2 class="text-2xl font-bold">Welcome! <?= $adminName ?></h2>
             </a>
-            <a href="/LSPWebsite/admin/logout" class="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Log Out</a>
+            <div class="flex space-x-2">
+                <a href="/LSPWebsite/" class="inline-block bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Home Page</a>
+                <a href="/LSPWebsite/admin/logout" class="inline-block bg-red-500 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors">Log Out</a>
+            </div>
         </div>
     </nav>
 
-    <div class="container mx-auto mt-8">
+    <div class="container mx-auto my-4">
         <div class="bg-white p-6 rounded shadow-md">
             <div class="flex justify-between items-center pb-4">
                 <h2 class="text-2xl font-bold">Articles</h2>
                 <?php if (isset($_SESSION['message'])) : ?>
                     <div id="messagePopup" class="fixed bottom-5 right-5 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50">
                         <?= htmlspecialchars($_SESSION['message']); ?>
+                        <button onclick="document.getElementById('messagePopup').style.display='none'" class="float-right">&times;</button>
                     </div>
-                    <?php unset($_SESSION['message']);
-                    ?>
+                    <?php unset($_SESSION['message']); ?>
                 <?php endif; ?>
                 <?php if (isset($_SESSION['error'])) : ?>
                     <div id="errorPopup" class="fixed bottom-5 right-5 bg-red-500 text-white p-4 rounded-lg shadow-lg z-50">
                         <?= htmlspecialchars($_SESSION['error']); ?>
-                        <button onclick="document.getElementById('errorPopup').style.display='none'" class="text-lg ml-2">&times;</button>
+                        <button onclick="document.getElementById('errorPopup').style.display='none'" class="float-right">&times;</button>
                     </div>
                     <?php unset($_SESSION['error']); ?>
                 <?php endif; ?>
                 <div class="flex space-x-4">
                     <!-- Search Form -->
-                    <form action="/LSPWebsite/admin/dashboard" method="get" class="flex items-center space-x-1">
-                        <input type="text" name="search" placeholder="Search articles..." class="py-2 px-4 border rounded-lg text-gray-700 focus:outline-none focus:border-blue-500" />
-                        <button type="submit" class="bg-gray-300 text-gray-700 px-4 py-2 rounded hover:bg-gray-400 transition-colors">Search</button>
+                    <form action="/LSPWebsite/admin/dashboard" method="get" class="flex items-center">
+                        <input type="text" id="searchInput" name="search" placeholder="Search articles..." class="text-black py-2 px-4 rounded-l-lg focus:outline-none border" />
+                        <button type="submit" class="bg-blue-500 text-white py-2 px-4 rounded-r-lg hover:bg-blue-600">Search</button>
                     </form>
                     <a href="/LSPWebsite/admin/article-create" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors">Add Article</a>
                 </div>
@@ -60,11 +63,11 @@
                 <table class="min-w-full bg-white">
                     <thead class="bg-gray-800 text-white">
                         <tr>
-                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Title</th>
-                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Created At</th>
-                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Updated At</th>
-                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Status</th>
-                            <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Actions</th>
+                            <th class="py-2 px-1 text-left text-xs sm:text-sm sm:px-4 uppercase font-semibold">Title</th>
+                            <th class="py-2 px-1 text-left text-xs sm:text-sm sm:px-4 uppercase font-semibold">Created At</th>
+                            <th class="hidden sm:table-cell py-2 px-1 text-left text-xs sm:text-sm sm:px-4 uppercase font-semibold">Updated At</th>
+                            <th class="py-2 px-1 text-left text-xs sm:text-sm sm:px-4 uppercase font-semibold">Status</th>
+                            <th class="py-2 px-1 text-left text-xs sm:text-sm sm:px-4 uppercase font-semibold">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-700">
@@ -77,7 +80,7 @@
                                 <td class="flex items-center py-3 px-4">
                                     <!-- Edit Button -->
                                     <a href="/LSPWebsite/admin/article-edit?id=<?= $article['article_id'] ?>" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700 transition-colors mr-2">Edit</a>
-
+                                    <a href="/LSPWebsite/article/view?id=<?= $article['article_id'] ?>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors mr-2">View</a>
                                     <!-- Delete Button -->
                                     <form action="/LSPWebsite/admin/article-delete" onsubmit="return confirm('Are you sure you want to delete this article?');">
                                         <input type="hidden" name="article_id" value="<?= $article['article_id'] ?>">
@@ -93,14 +96,28 @@
     </div>
 
     <script>
-        window.onload = function() {
-            var messagePopup = document.getElementById('messagePopup');
+        window.onload = () => {
+            const messagePopup = document.getElementById('messagePopup');
             if (messagePopup) {
-                setTimeout(function() {
+                setTimeout(() => {
                     messagePopup.style.display = 'none';
                 }, 3000);
             }
         };
+
+        document.getElementById('searchInput').addEventListener('input', function() {
+            const searchQuery = this.value.toLowerCase();
+            const rows = document.querySelectorAll('table tbody tr');
+
+            rows.forEach((row) => {
+                const title = row.querySelector('td:first-child').textContent.toLowerCase();
+                if (title.includes(searchQuery)) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        });
     </script>
 
 </body>

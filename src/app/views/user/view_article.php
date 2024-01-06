@@ -10,6 +10,12 @@
         <title>Article not found.</title>
     <?php endif; ?>
     <style>
+        .article-content h1 {
+            font-size: 2rem !important;
+            font-weight: 600 !important;
+
+        }
+
         .article-content h2 {
             font-size: 1.5rem !important;
             font-weight: 600 !important;
