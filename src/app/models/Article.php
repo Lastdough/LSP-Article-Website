@@ -34,19 +34,23 @@ class Article
         return (int)$articleId;
     }
 
-    /**
-     * Mengambil semua artikel dari database.
-     * 
-     * @return array Array berisi artikel
-     */
-    public function getAllArticles()
+    public function getArticles($limit = null)
     {
         $query = "SELECT article_table.*, admin_table.name AS author_name 
               FROM article_table 
               LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id
-              WHERE publish_state = 'publish'";
+              WHERE article_table.publish_state = 'publish'";
+
+        if (isset($limit)) {
+            $query .= " ORDER BY article_table.updated_at DESC LIMIT :limit";
+        }
 
         $stmt = $this->conn->prepare($query);
+
+        if (isset($limit)) {
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+        }
+
         $stmt->execute();
         $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -57,39 +61,6 @@ class Article
             }
         }
 
-        return $articles;
-    }
-
-    /**
-     * Retrieves the most recent articles.
-     * 
-     * @param int $limit The number of recent articles to retrieve.
-     * @return array An array of recent articles.
-     */
-    public function getRecentArticles($limit = 5)
-    {
-        // SQL query to fetch recent articles
-        $query = "SELECT article_table.*, admin_table.name AS author_name 
-              FROM article_table 
-              LEFT JOIN admin_table ON article_table.admin_id = admin_table.admin_id
-              WHERE article_table.publish_state = 'publish'
-              ORDER BY article_table.updated_at DESC 
-              LIMIT :limit";
-
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        $articles = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-
-        foreach ($articles as $key => $article) {
-            if (isset($article['picture'])) {
-                $base64 = base64_encode($article['picture']);
-                $articles[$key]['picture'] = 'data:image/jpeg;base64,' . $base64;
-            }
-        }
         return $articles;
     }
 

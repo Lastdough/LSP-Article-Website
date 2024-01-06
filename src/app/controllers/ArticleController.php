@@ -14,14 +14,14 @@ class ArticleController
     public function index()
     {
         $searchTerm = $_GET['query'] ?? ''; // Retrieve the search query from the URL
-        $recentArticles = $this->articleModel->getRecentArticles();
+        $recentArticles = $this->articleModel->getArticles(5);
 
         if ($searchTerm) {
             // If there's a search term, search for articles using the search term
             $articles = $this->articleModel->searchArticles($searchTerm);
         } else {
             // If there's no search term, get all articles
-            $articles = $this->articleModel->getAllArticles();
+            $articles = $this->articleModel->getArticles();
         }
 
         include 'src\app\views\user\home_page.php';
