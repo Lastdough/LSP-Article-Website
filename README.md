@@ -9,21 +9,21 @@
                 - AdminController.php
                 - ArticleController.php
             /models
-                - Database.php
-                - Article.php
                 - Admin.php
+                - Article.php
+                - Database.php
             /views
                 /admin
+                    - create_article.php
                     - dashboard.php
+                    - edit_article.php
                     - login.php
                     - register.php
-                    - edit_article.php
-                    - create_article.php
+                /error
+                    - 404.php
                 /user
                     - home_page.php
                     - view_article.php
-                /error
-                    - 404.php
         /public
             /css
             /js
