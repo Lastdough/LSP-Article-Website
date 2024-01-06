@@ -59,7 +59,7 @@
                 <!-- Picture Input -->
                 <div class="mb-4">
                     <label for="picture" class="block text-gray-700 text-sm font-bold mb-2">Picture:</label>
-                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();">
+                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();" required>
                     <!-- Image Preview Container -->
                     <div id="imagePreviewContainer" class="mt-2">
                         <img id="imagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mt-2" />

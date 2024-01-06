@@ -10,253 +10,248 @@ class ArticleController
         $this->articleModel = new Article();
     }
 
-    // GET : Home Page & All Article
+    /**
+     * Menampilkan halaman utama (Home Page) yang berisi daftar artikel.
+     * 
+     * Metode: GET
+     * 
+     * Hasil:
+     * - $articles: Daftar artikel yang akan ditampilkan di halaman utama.
+     * - $recentArticles: Daftar artikel terbaru yang akan ditampilkan di bagian sidebar.
+     */
     public function index()
     {
-        $searchTerm = $_GET['query'] ?? ''; // Retrieve the search query from the URL
-        $recentArticles = $this->articleModel->getArticles(5);
+        $searchTerm = $_GET['query'] ?? '';  // Mengambil kata kunci pencarian dari URL, atau mengisi dengan string kosong jika tidak ada
+        $recentArticles = $this->articleModel->getArticles(5);  // Mengambil lima artikel terbaru dari model
 
-        if ($searchTerm) {
-            // If there's a search term, search for articles using the search term
-            $articles = $this->articleModel->searchArticles($searchTerm);
-        } else {
-            // If there's no search term, get all articles
-            $articles = $this->articleModel->getArticles();
-        }
+        // Jika ada kata kunci pencarian, lakukan pencarian artikel berdasarkan kata kunci tersebut
+        // Jika tidak, ambil semua artikel
+        $articles = $searchTerm ?
+            $this->articleModel->searchArticles($searchTerm) :
+            $this->articleModel->getArticles();
 
         include 'src\app\views\user\home_page.php';
     }
 
-    // GET : Article by Id 
+    /**
+     * Menampilkan detail dari sebuah artikel berdasarkan ID artikel.
+     * Jika artikel tidak ditemukan, pengguna akan diarahkan ke halaman error 404.
+     * 
+     * @param int $articleId ID dari artikel yang ingin dilihat.
+     * 
+     * Metode: GET
+     * 
+     * Hasil:
+     * - Jika artikel ditemukan: Tampilan detail artikel akan ditampilkan.
+     * - Jika artikel tidak ditemukan: Pengguna akan diarahkan ke halaman error 404.
+     */
     public function view($articleId)
     {
-        $article = $this->articleModel->getArticleById($articleId);
-        $originalDate = $article['updated_at'];
-        $date = new DateTime($originalDate, new DateTimeZone('Asia/Jakarta'));
+        $article = $this->articleModel->getArticleById($articleId);  // Mengambil detail artikel berdasarkan ID
+
+        // Jika artikel tidak ditemukan, arahkan ke halaman error 404
+        if (!$article) {
+            $this->not_found_404();
+            return;
+        }
+
+        // Mengonversi tanggal ke zona waktu 'Asia/Jakarta' dan memformatnya
+        $date = new DateTime($article['updated_at'], new DateTimeZone('Asia/Jakarta'));
         $formattedDate = $date->format('M j, Y, H:i T');
 
-        if ($article) {
-            include 'src\app\views\user\view_article.php';
-        } else {
-            $this->not_found_404();
-        }
+        // Memuat tampilan detail artikel
+        include 'src/app/views/user/view_article.php';
     }
 
-    // POST : Create New Article
+    /**
+     * Membuat artikel baru.
+     * 
+     * Metode: POST
+     */
     public function createArticle()
     {
-        // Get the form data
+        $this->ensureAdminLoggedIn();  // Memastikan bahwa admin telah login
+
+        // Mengambil data dari form pembuatan artikel yang dikirim melalui POST
         $title = $_POST['title'];
         $header = $_POST['header'];
         $content = $_POST['content'];
-        $publishState = $_POST['action']; // 'draft' or 'publish' based on which button is clicked
-        $adminId = $_SESSION['admin_id']; // The logged-in admin's ID
+        $publishState = $_POST['action'];
+        $adminId = $_SESSION['admin_id'];
 
-        // Initialize a result variable
-        $result = "";
+        // Menghandle upload gambar dan mendapatkan hasilnya
+        $uploadResult = $this->handleFileUpload();
 
-
-        // Check if a file was uploaded
-        if (isset($_FILES['picture'])) {
-            $file = $_FILES['picture'];
-
-            // Check for upload errors
-            if ($file['error'] == UPLOAD_ERR_OK) {
-                $maxFileSize = 15 * 1024 * 1024; // 16MB in bytes
-                if (
-                    $file['size'] > $maxFileSize
-                ) {
-                    $result = "File is too large. Maximum size allowed is 15MB.";
-                }
-
-                // Validate file type
-                $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-                $detectedType = mime_content_type($file['tmp_name']);
-                if (!in_array($detectedType, $allowedTypes)) {
-                    $result = "Invalid file type. Only JPG, PNG, and GIF are allowed.";
-                }
-
-                // Proceed if no errors
-                if (empty($result)) {
-                    // Specify the directory where the file is going to be placed
-                    $target_dir = 'src/public/img/';
-                    $target_file = $target_dir . basename($file["name"]);
-
-                    // Attempt to move the uploaded file to the target directory
-                    if (move_uploaded_file($file["tmp_name"], $target_file)) {
-                        // Convert image to blob and save in the database
-                        $imageBlob = file_get_contents($target_file);
-
-                        // Assuming you have a method in your model to save the article
-                        $result = $this->articleModel->createArticle($adminId, $title, $header, $imageBlob, $content, $publishState);
-
-
-                        // Remove the file if you don't need it after saving to the database
-                        unlink($target_file);
-                    } else {
-                        $result = "Sorry, there was an error uploading your file.";
-                    }
-                }
-            } else {
-                // Handle different file upload errors
-                $result = "File upload error: " . $file['error'];
-            }
-        } else {
-            $result = "No file uploaded.";
+        // Jika terdapat kesalahan saat mengupload gambar, tampilkan pesan error dan arahkan kembali ke halaman pembuatan artikel
+        if (isset($uploadResult['error'])) {
+            $_SESSION['error'] = $uploadResult['error'];
+            header('Location: /LSPWebsite/admin/article-create');
+            exit;
         }
 
-        // Redirect or display a message based on the result
+        // Membuat artikel dengan data yang diterima
+        $result = $this->articleModel->createArticle($adminId, $title, $header, $uploadResult['pictureBinary'], $content, $publishState);
+
+        // Jika artikel berhasil dibuat, arahkan ke dashboard dengan pesan sukses
         if ($result === "Article Created Successfully") {
-            // Redirect to the dashboard with a success message
             $_SESSION['message'] = "Article created successfully.";
             header('Location: /LSPWebsite/admin/dashboard');
             exit;
         } else {
+            // Jika terjadi kesalahan saat membuat artikel, tampilkan pesan error dan arahkan kembali ke halaman pembuatan artikel
             $_SESSION['error'] = $result;
             header('Location: /LSPWebsite/admin/article-create');
             exit;
         }
     }
 
-
-    // GET : Create New Article View
+    /**
+     * Menampilkan halaman untuk membuat artikel baru.
+     * 
+     * Metode: GET
+     */
     public function createArticleView()
     {
-        if (!isAdminLoggedIn()) {
-            header('Location: /LSPWebsite/admin/login');
-            exit;
-        }
-        include 'src\app\views\admin\create_article.php';
+        $this->ensureAdminLoggedIn();
+        include 'src/app/views/admin/create_article.php';
     }
 
 
-    // PUT: Edit Article
+    /**
+     * Mengedit artikel berdasarkan ID artikel.
+     * 
+     * @param int $articleId ID dari artikel yang akan diedit.
+     * 
+     * Metode: PUT
+     */
     public function editArticle($articleId)
     {
-        // Check if the admin is logged in
-        if (!isAdminLoggedIn()) {
-            header('Location: /LSPWebsite/admin/login');
-            exit;
-        }
+        $this->ensureAdminLoggedIn();  // Memastikan bahwa admin telah login
 
-        // Get the form data
+        // Mengambil data dari form pengeditan artikel yang dikirim melalui POST
         $title = $_POST['title'];
         $header = $_POST['header'];
         $content = $_POST['content'];
-        $publishState = $_POST['action']; // 'draft' or 'publish'
-        $adminId = $_SESSION['admin_id']; // Logged-in admin's ID
+        $publishState = $_POST['action'];
+        $adminId = $_SESSION['admin_id'];
 
-        // Handle file upload and get picture binary data
-        $pictureBinary = $this->handlePictureUpload($articleId);
+        // Menghandle upload gambar dan mendapatkan hasilnya
+        $uploadResult = $this->handleFileUpload();
 
-        // Update the article in the database
+        // Jika terdapat kesalahan saat mengupload gambar, tampilkan pesan error dan arahkan kembali ke halaman pengeditan artikel
+        if (isset($uploadResult['error'])) {
+            $_SESSION['error'] = $uploadResult['error'];
+            header('Location: /LSPWebsite/admin/edit-article/' . $articleId);
+            exit;
+        }
+
+        // Jika tidak ada file yang diupload, set gambarBinary menjadi null
+        if ($uploadResult['nofile'] === "No file uploaded.") {
+            $pictureBinary = null;
+        } else {
+            $pictureBinary = $uploadResult['pictureBinary'];
+        }
+
+        // Memperbarui artikel dengan data yang diterima
         $result = $this->articleModel->updateArticle($articleId, $title, $header, $pictureBinary, $content, $publishState, $adminId);
 
-        // Redirect based on the result
+        // Jika artikel berhasil diperbarui, arahkan ke dashboard dengan pesan sukses
         if ($result === "Article Updated Successfully") {
             $_SESSION['message'] = "Article updated successfully.";
             header('Location: /LSPWebsite/admin/dashboard');
         } else {
+            // Jika terjadi kesalahan saat memperbarui artikel, tampilkan pesan error dan arahkan kembali ke halaman pengeditan artikel
             $_SESSION['error'] = $result;
-            header('Location: /LSPWebsite/admin/dashboard');
+            header('Location: /LSPWebsite/admin/article-edit?id=' . $articleId);
         }
         exit;
     }
 
-    private function handlePictureUpload($articleId)
-    {
-        if (isset($_FILES['picture']) && $_FILES['picture']['error'] == UPLOAD_ERR_OK) {
-            $uploadResult = $this->processUploadedFile();
-            if ($uploadResult['error']) {
-                $_SESSION['error'] = $uploadResult['message'];
-                header('Location: /LSPWebsite/admin/dashboard');
-                exit;
-            }
-            return $uploadResult['pictureBinary'];
-        } else {
-            return null;
-        }
-    }
-
-    private function processUploadedFile()
-    {
-        $file = $_FILES['picture'];
-        $maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
-        $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-        if ($file['size'] > $maxFileSize) {
-            return ['error' => true, 'message' => "File is too large. Maximum size allowed is 5MB."];
-        }
-
-        if (!in_array(mime_content_type($file['tmp_name']), $allowedTypes)) {
-            return ['error' => true, 'message' => "Invalid file type. Only JPG, PNG, and GIF are allowed."];
-        }
-
-        $target_dir = 'src/public/img/';
-        $target_file = $target_dir . basename($file["name"]);
-
-        if (move_uploaded_file($file["tmp_name"], $target_file)) {
-            $pictureBinary = file_get_contents($target_file);
-            unlink($target_file); // Optionally remove the file after getting its content
-            return ['error' => false, 'pictureBinary' => $pictureBinary];
-        } else {
-            return ['error' => true, 'message' => "Sorry, there was an error uploading your file."];
-        }
-    }
-
-    // GET: Edit Article View
+    /**
+     * Menampilkan halaman untuk mengedit artikel.
+     * 
+     * @param int $articleId ID dari artikel yang akan diedit.
+     * 
+     * Metode: GET
+     */
     public function editArticleView($articleId)
     {
-        // Check if the admin is logged in
-        if (!isAdminLoggedIn()) {
-            header('Location: /LSPWebsite/admin/login');
-            exit;
-        }
-
-        // Retrieve the article details
+        $this->ensureAdminLoggedIn();
         $article = $this->articleModel->getArticleById($articleId);
         if (!$article) {
-            // Handle the case where the article doesn't exist
             $_SESSION['error'] = "The requested article does not exist.";
             header('Location: /LSPWebsite/admin/dashboard');
             exit;
         }
-
-        // Include the edit article view and pass the article details
         include 'src/app/views/admin/edit_article.php';
     }
 
-    // DELETE: Delete Article
+    /**
+     * Menghapus artikel berdasarkan ID artikel.
+     * 
+     * @param int $articleId ID dari artikel yang akan dihapus.
+     * 
+     * Metode: DELETE
+     */
     public function deleteArticle($articleId)
     {
-        // Check if the admin is logged in
-        if (!isAdminLoggedIn()) {
-            header('Location: /LSPWebsite/admin/login');
-            exit;
-        }
-
-        // Optional: Validate that the article exists before attempting to delete
-        $existingArticle = $this->articleModel->getArticleById($articleId);
-        if (!$existingArticle) {
-            $_SESSION['error'] = "Article not found.";
-            header('Location: /LSPWebsite/admin/dashboard');
-            exit;
-        }
-
-        // Perform the deletion
+        $this->ensureAdminLoggedIn();
         $result = $this->articleModel->deleteArticle($articleId);
-
-        // Redirect based on the result
-        if ($result === "Article Deleted Successfully") {
-            $_SESSION['message'] = "Article deleted successfully.";
-        } else {
-            $_SESSION['error'] = $result;
-        }
+        $_SESSION[$result === "Article Deleted Successfully" ? 'message' : 'error'] = $result;
         header('Location: /LSPWebsite/admin/dashboard');
         exit;
     }
 
 
+    private function ensureAdminLoggedIn()
+    {
+        if (!isAdminLoggedIn()) {
+            header('Location: /LSPWebsite/admin/login');
+            exit;
+        }
+    }
+
+    /**
+     * Menghandle proses upload file gambar dari form.
+     * 
+     * @return array Hasil dari proses upload file:
+     *               - ['pictureBinary'] jika file berhasil diupload dan dikonversi menjadi binary.
+     *               - ['error'] jika terdapat kesalahan saat proses upload.
+     *               - ['nofile'] jika tidak ada file yang diupload.
+     */
+    private function handleFileUpload()
+    {
+        if (isset($_FILES['picture']) && $_FILES['picture']['error'] == UPLOAD_ERR_OK) {
+            $file = $_FILES['picture'];
+            $maxFileSize = 15 * 1024 * 1024; // batasan ukuran file 15 MB
+            
+            // Validasi ukuran file
+            if ($file['size'] > $maxFileSize) {
+                return ['error' => "File is too large. Maximum size allowed is 15MB."];
+            }
+
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+
+            // Validasi tipe file
+            if (!in_array(mime_content_type($file['tmp_name']), $allowedTypes)) {
+                return ['error' => "Invalid file type. Only JPG, PNG, and GIF are allowed."];
+            }
+
+            $target_dir = 'src/public/img/';
+            $target_file = $target_dir . basename($file["name"]);
+
+            // Pindahkan file yang diupload ke direktori target
+            if (move_uploaded_file($file["tmp_name"], $target_file)) {
+                $pictureBinary = file_get_contents($target_file);
+                unlink($target_file); // Hapus file setelah diambil datanya
+                return ['pictureBinary' => $pictureBinary];
+            } else {
+                return ['error' => "Sorry, there was an error uploading your file."];
+            }
+        }
+
+        return ['nofile' => "No file uploaded."];
+    }
 
     public function not_found_404()
     {
