@@ -59,7 +59,7 @@
                 <!-- Picture Input -->
                 <div class="mb-4">
                     <label for="picture" class="block text-gray-700 text-sm font-bold mb-2">Picture:</label>
-                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();">
+                    <input type="file" id="picture" name="picture" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" onchange="previewImage();" required>
                     <!-- Image Preview Container -->
                     <div id="imagePreviewContainer" class="mt-2">
                         <img id="imagePreview" src="#" alt="Image Preview" class="hidden max-w-xs mt-2" />
@@ -73,8 +73,8 @@
                 </div>
 
                 <!-- Buttons for Draft and Publish -->
-                <div class="flex justify-between">
-                    <button type="submit" name="action" value="draft" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors">Save as Draft</button>
+                <div class="flex justify-end">
+                    <button type="submit" name="action" value="draft" class="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors mr-2">Save as Draft</button>
                     <button type="submit" name="action" value="publish" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition-colors">Publish</button>
                 </div>
             </form>
